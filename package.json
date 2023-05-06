@@ -1,0 +1,25 @@
+{
+  "name": "2d-polygons",
+  "version": "1.0.0",
+  "description": "",
+  "main": "draw_polygons.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vishnusidharth/2d-ploygons.git"
+  },
+  "author": "Vishnu Sidharth",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vishnusidharth/2d-ploygons/issues"
+  },
+  "homepage": "https://github.com/vishnusidharth/2d-ploygons#readme",
+  "dependencies": {
+    "three": "^0.152.2"
+  },
+  "devDependencies": {
+    "vite": "^4.3.5"
+  }
+}
