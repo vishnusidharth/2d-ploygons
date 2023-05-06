@@ -1,11 +1,15 @@
 import * as THREE from 'three';
+import Polygon from './polygon';
+import Vertex from './vertex'
+import Line from './line';
+import RaycasterIntersections from './raycaster'
 
 // Define global variables for the scene and objects
 let scene, camera, renderer, plane, vertices = [], lines = [], completedPolygon = [];
 let completed = false;
 
-// Setup the scene
 function init() {
+    // Setup the scene
     scene = new THREE.Scene();
 
     // Setup the camera
@@ -34,7 +38,7 @@ function init() {
     plane.add(gridHelper);
 
     // Add a mouse click listener to the renderer
-    renderer.domElement.addEventListener('mousedown', onMouseDown);
+    renderer.domElement.addEventListener('mousedown', startDrawingPolygon);
 
     // Adding event listeners to the control buttons
     const [completeButton, resetButton, copyButton] = document.querySelectorAll('.controls>button');
@@ -47,7 +51,7 @@ function init() {
 }
 
 // Mouse down event handler
-function onMouseDown(event) {
+function startDrawingPolygon(event) {
     event.preventDefault();
 
     // Check if the polygon is complete
@@ -56,15 +60,10 @@ function onMouseDown(event) {
     }
 
     // Get the mouse position on the plane
-    const mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
+    const mouse = getMousePosition(event);
 
     // Check for intersections with the plane
-    const intersects = raycaster.intersectObject(plane);
+    const intersects = new RaycasterIntersections(mouse, camera, plane).intersectionPoints;
     if (intersects.length > 0) {
         const point = intersects[0].point;
 
@@ -78,37 +77,23 @@ function onMouseDown(event) {
     }
 }
 
+function getMousePosition(event) {
+    const mouse = new THREE.Vector2();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    return mouse
+}
+
 function createVertex(point) {
-    const vertexGeometry = new THREE.SphereGeometry(0.1);
-    const vertexMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const vertex = new THREE.Mesh(vertexGeometry, vertexMaterial);
-    vertex.position.copy(point);
+    const vertex = new Vertex(point).generateVertex();
     vertices.push(vertex);
     scene.add(vertex);
 }
 
 function drawLine(vertices) {
-    const lineGeometry = new THREE.BufferGeometry();
-    lineGeometry.setFromPoints(vertices.map(vertex => vertex.position))
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-    const line = new THREE.Line(lineGeometry, lineMaterial);
+    const line = new Line(vertices).generateLine();
     lines.push(line);
     scene.add(line);
-}
-
-// function that will generate and return polygon based on the global vertices
-function createPolygon() {
-    const shape = new THREE.Shape(vertices.map(vertex => new THREE.Vector2(vertex.position.x, vertex.position.y)));
-    const geometry = new THREE.ShapeGeometry(shape)
-    const material = new THREE.MeshBasicMaterial({ color: 0xff5500, side: THREE.DoubleSide });
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(
-        vertices.reduce((acc, vertex) =>
-            new Float32Array([...acc, ...[Number(vertex.position.x), Number(vertex.position.y), Number(vertex.position.z)]]),
-            []
-        ),
-        3
-    ));
-    return new THREE.Mesh(geometry, material);
 }
 
 // Complete the polygon
@@ -119,7 +104,7 @@ function completePolygon() {
     }
     if (!completed) {
         // Create the polygon
-        const polygon = createPolygon();
+        const polygon = new Polygon(vertices).generatePolygon();
 
         // generate edge that connecting first and last vertex
         drawLine([...vertices, vertices[0]])
@@ -140,18 +125,11 @@ function completePolygon() {
 }
 
 function resetCanvas() {
-    completedPolygon.forEach(polygon => scene.remove(polygon));
-    lines.forEach(line => scene.remove(line));
-    vertices.forEach(vertex => scene.remove(vertex));
+    [...completedPolygon, ...lines, ...vertices].forEach(item => scene.remove(item));
     completedPolygon = [];
     vertices = [];
     lines = [];
     completed = false;
-}
-
-function animate() {
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate)
 }
 
 function copyPolygon() {
@@ -163,16 +141,13 @@ function copyPolygon() {
     completedPolygon.push(clone)
     scene.add(clone);
 
-    const raycaster = new THREE.Raycaster();
+    // const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
     function onMouseMove(event) {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        const mouse = getMousePosition(event);
 
-        raycaster.setFromCamera(mouse, camera);
-
-        const intersects = raycaster.intersectObject(plane);
+        const intersects = new RaycasterIntersections(mouse, camera, plane).intersectionPoints;
 
         if (intersects.length > 0) {
             clone.position.copy(intersects[0].point);
@@ -188,6 +163,11 @@ function copyPolygon() {
     document.addEventListener('mousedown', onMouseDown);
 
 };
+
+function animate() {
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate)
+}
 
 // starting the app
 init();
