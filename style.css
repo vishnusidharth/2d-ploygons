@@ -3,3 +3,11 @@
     padding: 0;
     box-sizing: border-box;
 }
+
+.controls {
+    position: absolute;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    column-gap: 5px;
+}
