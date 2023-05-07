@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import Polygon from './polygon';
-import Vertex from './vertex'
-import Line from './line';
+import Polygon from './scripts/draw/polygon';
+import Vertex from './scripts/draw/vertex'
+import Line from './scripts/draw/line';
 
 // Define global variables for the scene and objects
 let scene, camera, renderer, plane, vertices = [], lines = [], completedPolygon = [];
