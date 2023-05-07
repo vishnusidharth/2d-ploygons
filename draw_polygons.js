@@ -13,8 +13,8 @@ function init() {
     scene = new THREE.Scene();
 
     // Setup the camera
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0, 20);
+    camera = new THREE.OrthographicCamera(window.innerWidth/-2, window.innerWidth/2, window.innerHeight/2, window.innerHeight/-2, 0.1, 1000);
+    camera.position.z = 100;
 
     // Setup the renderer
     renderer = new THREE.WebGLRenderer({
@@ -25,14 +25,14 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     // Setup the ground plane
-    const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
+    const planeGeometry = new THREE.PlaneGeometry(500, 500, 500, 500);
     const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.name = 'plane';
     scene.add(plane);
 
     // Create grid lines on the ground plane
-    const gridHelper = new THREE.GridHelper(20, 20);
+    const gridHelper = new THREE.GridHelper(500, 15);
     gridHelper.name = 'helper'
     gridHelper.rotateX(Math.PI / 2)
     plane.add(gridHelper);
@@ -85,7 +85,7 @@ function getMousePosition(event) {
 }
 
 function createVertex(point) {
-    const vertex = new Vertex(point).generateVertex();
+    const vertex = new Vertex(point, 2).generateVertex();
     vertices.push(vertex);
     scene.add(vertex);
 }
@@ -140,9 +140,6 @@ function copyPolygon() {
     const clone = completedPolygon[0].clone();
     completedPolygon.push(clone)
     scene.add(clone);
-
-    // const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
 
     function onMouseMove(event) {
         const mouse = getMousePosition(event);
