@@ -1,6 +1,14 @@
 # 2d-ploygons
 This project using vite.js bundler as dev-dependency.
 
-To run the program in local server, run the following commands:
+To install dependencies run: 
 npm i
-npx vite
+
+To run the program in local server, run the commands:
+npm run dev
+
+To create build, run the command: 
+npm run build
+
+To preview the build, run the command: 
+npm run preview
